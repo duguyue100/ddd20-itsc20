@@ -1,6 +1,6 @@
 # This is a Python template Makefile, do modification as you want
 #
-# Project: spiker
+# Project: ddd17-cvpr
 # Author: Yuhuang Hu
 # Email : duguyue100@gmail.com
 
