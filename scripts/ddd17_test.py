@@ -81,8 +81,8 @@ from spiker import log
 #                           "aug15/rec1502825681.hdf5")
 # CVPR data review
 # Night 1
-#  file_name = os.path.join(spiker.SPIKER_DATA, "ddd17",
-#                           "jul01/rec1498951073.hdf5")
+file_name = os.path.join(spiker.SPIKER_DATA, "ddd17",
+                         "jul01/rec1498946027.hdf5")
 # Night 2
 #  file_name = os.path.join(spiker.SPIKER_DATA, "ddd17",
 #                           "aug01/rec1501651162.hdf5")
