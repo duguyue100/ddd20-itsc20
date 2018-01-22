@@ -108,6 +108,18 @@ def get_log_file_dict(env="day", mode="full", task="steering",
     return log_file_dict
 
 
+def get_log_file_dict_review(env="day", mode="full", task="steering",
+                             exp_dir=spiker.SPIKER_EXPS):
+    """Get data."""
+    data_range = 7 if env == "day" else 8
+    log_file_dict = OrderedDict()
+    for idx in xrange(data_range):
+        file_base = task+"-"+env+"-%d-" % (idx+1)+mode+"-review"
+        log_file_dict[file_base] = join(exp_dir, file_base,
+                                        "csv_history.log")
+    return log_file_dict
+
+
 #  option = "get-full-results"
 #  option = "get-dvs-results"
 #  option = "get-aps-results"
@@ -115,12 +127,13 @@ def get_log_file_dict(env="day", mode="full", task="steering",
 #  option = "get-results-reproduce"
 #  option = "get-results-reproduce-steer"
 #  option = "get-steering-results"
+option = "get-steering-results-review"
 #  option = "attribute-hist"
 #  option = "get-steer-loss-curves"
 #  option = "get-results-reproduce-steer-all"
 #  option = "export-images-for-dataset"
 #  option = "export-rate"
-option = "align-fps-events"
+#  option = "align-fps-events"
 
 if option == "get-full-results":
     steer_day_logs = get_log_file_dict("day", "full", "steering")
@@ -204,6 +217,67 @@ elif option == "get-steering-results":
         print (key, ":", temp_res.mean(), "std:", temp_res.std(),
                "best", temp_res.argmin())
         print (temp_res)
+    avg_error = np.array([day_sum_1+night_sum_1,
+                          day_sum_2+night_sum_2,
+                          day_sum_3+night_sum_3,
+                          day_sum_4+night_sum_4])/15.
+    avg_error = np.sqrt(avg_error)*180/np.pi
+    print ("Average Error:", avg_error.mean(), "std:", avg_error.std())
+elif option == "get-steering-results-review":
+    sensor_mode = "aps"
+    # collecting logs
+    # run 1
+    day_logs_1 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-1")
+    night_logs_1 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-1")
+    # run 2
+    day_logs_2 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-2")
+    night_logs_2 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-2")
+    # run 3
+    day_logs_3 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-3")
+    night_logs_3 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-3")
+    # run 4
+    day_logs_4 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-4")
+    night_logs_4 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-4")
+    # collect results
+    day_res_1, day_sum_1 = get_best_result(day_logs_1)
+    night_res_1, night_sum_1 = get_best_result(night_logs_1)
+    day_res_2, day_sum_2 = get_best_result(day_logs_2)
+    night_res_2, night_sum_2 = get_best_result(night_logs_2)
+    day_res_3, day_sum_3 = get_best_result(day_logs_3)
+    night_res_3, night_sum_3 = get_best_result(night_logs_3)
+    day_res_4, day_sum_4 = get_best_result(day_logs_4)
+    night_res_4, night_sum_4 = get_best_result(night_logs_4)
+
+    # calculate mean and variance
+    for key in night_res_1:
+        temp_res = np.array([night_res_1[key], night_res_2[key],
+                             night_res_3[key],
+                             night_res_4[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std())
+    for key in day_res_1:
+        temp_res = np.array([day_res_1[key], day_res_2[key], day_res_3[key],
+                             day_res_4[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std(),
+               "best", temp_res.argmin())
+        #  print (temp_res)
     avg_error = np.array([day_sum_1+night_sum_1,
                           day_sum_2+night_sum_2,
                           day_sum_3+night_sum_3,
