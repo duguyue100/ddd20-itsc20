@@ -19,6 +19,21 @@ run:
 experimental:
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/experimental.json
 
+multi-run-exps-for-review-plus:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-4-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-5-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-6-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-7-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-8-full.json
+	# full day
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-1-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-2-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-3-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-4-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-5-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-6-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-day-7-full.json
+
 multi-run-exps-for-review:
 	# aps night
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-1-aps.json
