@@ -126,8 +126,9 @@ def get_log_file_dict_review(env="day", mode="full", task="steering",
 #  option = "get-loss-curves"
 #  option = "get-results-reproduce"
 #  option = "get-results-reproduce-steer"
-#  option = "get-steering-results"
-option = "get-steering-results-review"
+option = "get-steering-results"
+#  option = "get-steering-results-review"
+#  option = "get-steering-results-combined"
 #  option = "attribute-hist"
 #  option = "get-steer-loss-curves"
 #  option = "get-results-reproduce-steer-all"
@@ -171,24 +172,24 @@ if option == "get-full-results":
     print ("-"*30)
     print ((brake_day_sum+brake_night_sum)/15)
 elif option == "get-steering-results":
-    sensor_mode = "full"
+    sensor_mode = "aps"
     # collecting logs
     # run 1
     day_logs_1 = get_log_file_dict("day", sensor_mode, "steering",
                                    spiker.SPIKER_EXPS+"-run-1")
     night_logs_1 = get_log_file_dict("night", sensor_mode, "steering",
                                      spiker.SPIKER_EXPS+"-run-1")
-    # run 2 
+    # run 2
     day_logs_2 = get_log_file_dict("day", sensor_mode, "steering",
                                    spiker.SPIKER_EXPS+"-run-2")
     night_logs_2 = get_log_file_dict("night", sensor_mode, "steering",
                                      spiker.SPIKER_EXPS+"-run-2")
-    # run 3 
+    # run 3
     day_logs_3 = get_log_file_dict("day", sensor_mode, "steering",
                                    spiker.SPIKER_EXPS+"-run-3")
     night_logs_3 = get_log_file_dict("night", sensor_mode, "steering",
                                      spiker.SPIKER_EXPS+"-run-3")
-    # run 3 
+    # run 4
     day_logs_4 = get_log_file_dict("day", sensor_mode, "steering",
                                    spiker.SPIKER_EXPS+"-run-4")
     night_logs_4 = get_log_file_dict("night", sensor_mode, "steering",
@@ -224,7 +225,7 @@ elif option == "get-steering-results":
     avg_error = np.sqrt(avg_error)*180/np.pi
     print ("Average Error:", avg_error.mean(), "std:", avg_error.std())
 elif option == "get-steering-results-review":
-    sensor_mode = "aps"
+    sensor_mode = "full"
     # collecting logs
     # run 1
     day_logs_1 = get_log_file_dict_review(
@@ -282,6 +283,111 @@ elif option == "get-steering-results-review":
                           day_sum_2+night_sum_2,
                           day_sum_3+night_sum_3,
                           day_sum_4+night_sum_4])/15.
+    avg_error = np.sqrt(avg_error)*180/np.pi
+    print ("Average Error:", avg_error.mean(), "std:", avg_error.std())
+elif option == "get-steering-results-combined":
+    sensor_mode = "full"
+    # collecting logs
+    # run 1
+    day_logs_1 = get_log_file_dict("day", sensor_mode, "steering",
+                                   spiker.SPIKER_EXPS+"-run-1")
+    night_logs_1 = get_log_file_dict("night", sensor_mode, "steering",
+                                     spiker.SPIKER_EXPS+"-run-1")
+    # run 2
+    day_logs_2 = get_log_file_dict("day", sensor_mode, "steering",
+                                   spiker.SPIKER_EXPS+"-run-2")
+    night_logs_2 = get_log_file_dict("night", sensor_mode, "steering",
+                                     spiker.SPIKER_EXPS+"-run-2")
+    # run 3
+    day_logs_3 = get_log_file_dict("day", sensor_mode, "steering",
+                                   spiker.SPIKER_EXPS+"-run-3")
+    night_logs_3 = get_log_file_dict("night", sensor_mode, "steering",
+                                     spiker.SPIKER_EXPS+"-run-3")
+    # run 4
+    day_logs_4 = get_log_file_dict("day", sensor_mode, "steering",
+                                   spiker.SPIKER_EXPS+"-run-4")
+    night_logs_4 = get_log_file_dict("night", sensor_mode, "steering",
+                                     spiker.SPIKER_EXPS+"-run-4")
+    # collect results
+    day_res_1, day_sum_1 = get_best_result(day_logs_1)
+    night_res_1, night_sum_1 = get_best_result(night_logs_1)
+    day_res_2, day_sum_2 = get_best_result(day_logs_2)
+    night_res_2, night_sum_2 = get_best_result(night_logs_2)
+    day_res_3, day_sum_3 = get_best_result(day_logs_3)
+    night_res_3, night_sum_3 = get_best_result(night_logs_3)
+    day_res_4, day_sum_4 = get_best_result(day_logs_4)
+    night_res_4, night_sum_4 = get_best_result(night_logs_4)
+
+    # calculate mean and variance
+    for key in night_res_1:
+        temp_res = np.array([night_res_1[key], night_res_2[key],
+                             night_res_3[key],
+                             night_res_4[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std())
+    for key in day_res_1:
+        temp_res = np.array([day_res_1[key], day_res_2[key], day_res_3[key],
+                             day_res_4[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std(),
+               "best", temp_res.argmin())
+    # collecting logs
+    # run 1
+    day_logs_1 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-1")
+    night_logs_1 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-1")
+    # run 2
+    day_logs_2 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-2")
+    night_logs_2 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-2")
+    # run 3
+    day_logs_3 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-3")
+    night_logs_3 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-3")
+    # run 4
+    day_logs_4 = get_log_file_dict_review(
+        "day", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-4")
+    night_logs_4 = get_log_file_dict_review(
+        "night", sensor_mode, "steering",
+        spiker.SPIKER_EXPS+"-review-4")
+    # collect results
+    day_res_1_r, day_sum_1_r = get_best_result(day_logs_1)
+    night_res_1_r, night_sum_1_r = get_best_result(night_logs_1)
+    day_res_2_r, day_sum_2_r = get_best_result(day_logs_2)
+    night_res_2_r, night_sum_2_r = get_best_result(night_logs_2)
+    day_res_3_r, day_sum_3_r = get_best_result(day_logs_3)
+    night_res_3_r, night_sum_3_r = get_best_result(night_logs_3)
+    day_res_4_r, day_sum_4_r = get_best_result(day_logs_4)
+    night_res_4_r, night_sum_4_r = get_best_result(night_logs_4)
+
+    # calculate mean and variance
+    for key in night_res_1_r:
+        temp_res = np.array([night_res_1_r[key], night_res_2_r[key],
+                             night_res_3_r[key],
+                             night_res_4_r[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std())
+    for key in day_res_1_r:
+        temp_res = np.array([day_res_1_r[key], day_res_2_r[key],
+                             day_res_3_r[key],
+                             day_res_4_r[key]])
+        temp_res = np.sqrt(temp_res)*180/np.pi
+        print (key, ":", temp_res.mean(), temp_res.std(),
+               "best", temp_res.argmin())
+    avg_error = np.array([day_sum_1+night_sum_1+day_sum_1_r+night_sum_1_r,
+                          day_sum_2+night_sum_2+day_sum_2_r+night_sum_2_r,
+                          day_sum_3+night_sum_3+day_sum_3_r+night_sum_3_r,
+                          day_sum_4+night_sum_4+day_sum_4_r+night_sum_4_r])/30.
     avg_error = np.sqrt(avg_error)*180/np.pi
     print ("Average Error:", avg_error.mean(), "std:", avg_error.std())
 elif option == "get-dvs-results":
