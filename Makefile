@@ -19,6 +19,17 @@ run:
 experimental:
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/experimental.json
 
+multi-run-exps-for-review-extra:
+	# aps night
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-2-aps.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-8-aps.json
+	# dvs night
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-2-dvs.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-8-dvs.json
+	# full night
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-2-full.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-8-full.json
+
 multi-run-exps-for-review-plus:
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-4-full.json
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/review/steering-night-5-full.json
