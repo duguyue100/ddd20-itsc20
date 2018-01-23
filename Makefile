@@ -20,7 +20,7 @@ experimental:
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/experimental.json
 
 multi-run-exps-for-review-rerun-old:
-	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/teering-night-2-aps.json
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/steering-night-2-aps.json
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/steering-night-2-dvs.json
 	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering.py with ./exps/configs/cvprexps/steering-night-2-full.json
 
