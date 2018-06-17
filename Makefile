@@ -548,6 +548,9 @@ ddd17-export-prediction:
 ddd17-export-rate:
 	PYTHONPATH=$(PYTHONPATH) python ./scripts/ddd17_export_rate.py
 
+ddd17-export-map:
+	PYTHONPATH=$(PYTHONPATH) python ./scripts/ddd17_export_map.py
+
 # Experiments
 
 resnet-steering-3-5:
