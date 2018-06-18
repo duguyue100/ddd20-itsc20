@@ -52,7 +52,7 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
     print("[MESSAGE] Number of blocks: %d" % (blocks))
 
     # load data
-    data_path = os.path.join(spiker.HOME, "data", "exps", "ddd17",
+    data_path = os.path.join(spiker.HOME, "data", "exps", "data", "ddd17",
                              data_name)
     if not os.path.isfile(data_path):
         raise ValueError("This dataset does not exist at %s" % (data_path))
