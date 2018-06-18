@@ -3,8 +3,8 @@
 #SBATCH --time=24:0:0
 #SBATCH --array=1-450
 #SBATCH --gres gpu:Tesla-K80:1 --mem=32000
-#SBATCH --output=ral-experiment-%a.log
-#SBATCH --error=ral-experiment-%a.log
+#SBATCH --output=./exp-logs/ral-experiment-%a.log
+#SBATCH --error=./exp-logs/ral-experiment-%a.log
 
 source $HOME/.bashrc
 
