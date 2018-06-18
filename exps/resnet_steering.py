@@ -59,10 +59,10 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
     print("[MESSAGE] Dataset %s" % (data_path))
     assert len(frame_cut) == 2
     print("[MESSAGE] Frame cut: first at %d, last at %d"
-          % (frame_cut[0], -frame_cut[1]))
+          % (frame_cut[0]*2, -frame_cut[1]*2))
     frames, steering = ddd17.prepare_train_data(
         data_path, y_name="steering",
-        frame_cut=frame_cut,
+        frame_cut=[frame_cut[0]*2, frame_cut[1]*2],
         speed_threshold=15.)
     frames /= 255.
     frames -= np.mean(frames, keepdims=True)
