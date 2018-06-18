@@ -14,158 +14,137 @@ import spiker
 # configure path
 config_path = os.path.join(
     spiker.HOME, "workspace", "ddd17-cvpr", "exps", "configs",
-    "cvprexps", "review")
+    "ral-exps")
 
-print ("hi, I'm here")
+num_trails = 5
 
-# for day, for DVS
-for idx in range(1, 8):
-    source_base = "-day-%d-full.json" % (idx)
-    dvs_source_base = "-day-%d-dvs.json" % (idx)
-    steer_path = os.path.join(config_path, "steering"+source_base)
-    #  accel_path = os.path.join(config_path, "accel"+source_base)
-    #  brake_path = os.path.join(config_path, "brake"+source_base)
+conditions = ["full", "aps", "dvs"]
+channel_options = {
+    "full": 2,
+    "aps": 1,
+    "dvs": 0}
 
-    # open files
-    with open(steer_path, "r") as f:
-        steer_json = json.load(f)
-        f.close()
-    #  with open(accel_path, "r") as f:
-    #      accel_json = json.load(f)
-    #      f.close()
-    #  with open(brake_path, "r") as f:
-    #      brake_json = json.load(f)
-    #      f.close()
+data_list = [
+    "rec1499656391_export.hdf5",
+    "rec1499657850_export.hdf5",
+    "rec1501649676_export.hdf5",
+    "rec1501650719_export.hdf5",
+    "rec1501994881_export.hdf5",
+    "rec1502336427_export.hdf5",
+    "rec1502337436_export.hdf5",
+    "rec1498946027_export.hdf5",
+    "rec1501651162_export.hdf5",
+    "rec1499025222_export.hdf5",
+    "rec1502338023_export.hdf5",
+    "rec1502338983_export.hdf5",
+    "rec1502339743_export.hdf5",
+    "rec1498949617_export.hdf5",
+    "rec1502599151_export.hdf5",
+    "rec1500220388_export.hdf5",
+    "rec1500383971_export.hdf5",
+    "rec1500402142_export.hdf5",
+    "rec1501288723_export.hdf5",
+    "rec1501349894_export.hdf5",
+    "rec1501614399_export.hdf5",
+    "rec1502241196_export.hdf5",
+    "rec1502825681_export.hdf5",
+    "rec1499023756_export.hdf5",
+    "rec1499275182_export.hdf5",
+    "rec1499533882_export.hdf5",
+    "rec1500215505_export.hdf5",
+    "rec1500314184_export.hdf5",
+    "rec1500329649_export.hdf5",
+    "rec1501953155_export.hdf5"]
 
-    # modify fields
-    steer_json["model_name"] = "steering-day-%d-dvs-review" % (idx)
-    steer_json["channel_id"] = 0
-    #  accel_json["model_name"] = "accel-day-%d-dvs" % (idx)
-    #  accel_json["channel_id"] = 0
-    #  brake_json["model_name"] = "brake-day-%d-dvs" % (idx)
-    #  brake_json["channel_id"] = 0
+frame_cuts = [
+    [2000, 4000],
+    [500, 800],
+    [500, 500],
+    [500, 500],
+    [200, 800],
+    [100, 400],
+    [100, 400],
+    [3000, 1000],
+    [850, 4500],
+    [200, 1500],
+    [200, 1500],
+    [200, 2500],
+    [200, 1500],
+    [1000, 2200],
+    [1500, 3000],
+    [500, 200],
+    [500, 1000],
+    [200, 2000],
+    [200, 1000],
+    [200, 1500],
+    [200, 1500],
+    [500, 1000],
+    [500, 1700],
+    [800, 2000],
+    [200, 1000],
+    [500, 800],
+    [200, 2200],
+    [500, 500],
+    [200, 600],
+    [500, 1500]]
 
-    # write to file
-    with open(join(config_path, "steering"+dvs_source_base), "w") as f:
-        json.dump(steer_json, f)
-        f.close()
-    #  with open(join(config_path, "accel"+dvs_source_base), "w") as f:
-    #      json.dump(accel_json, f)
-    #      f.close()
-    #  with open(join(config_path, "brake"+dvs_source_base), "w") as f:
-    #      json.dump(brake_json, f)
-    #      f.close()
+experiment_id = 1
+for trail_idx in range(1, num_trails+1):
+    # for night
+    for idx in range(1, 16):
+        # for each condition
+        for cond in conditions:
+            # construct file name
+            model_base = \
+                "steering-night-%d-%s-%d" % (idx, cond, trail_idx)
 
-# for day, for APS
-for idx in range(1, 8):
-    source_base = "-day-%d-full.json" % (idx)
-    aps_source_base = "-day-%d-aps.json" % (idx)
-    steer_path = os.path.join(config_path, "steering"+source_base)
-    #  accel_path = os.path.join(config_path, "accel"+source_base)
-    #  brake_path = os.path.join(config_path, "brake"+source_base)
+            steering_dict = {}
+            steering_dict["model_name"] = model_base
+            steering_dict["data_name"] = data_list[idx-1]
+            steering_dict["channel_id"] = channel_options[cond]
+            steering_dict["stages"] = 3
+            steering_dict["blocks"] = 5
+            steering_dict["filter_list"] = \
+                [[16, 16, 16], [32, 32, 32], [64, 64, 64]]
+            steering_dict["nb_epoch"] = 200,
+            steering_dict["batch_size"] = 64
+            steering_dict["frame_cut"] = frame_cuts[idx-1]
 
-    # open files
-    with open(steer_path, "r") as f:
-        steer_json = json.load(f)
-        f.close()
-    #  with open(accel_path, "r") as f:
-    #      accel_json = json.load(f)
-    #      f.close()
-    #  with open(brake_path, "r") as f:
-    #      brake_json = json.load(f)
-    #      f.close()
+            with open(join(config_path, model_base+".json"), "w") as f:
+                json.dump(steering_dict, f)
+                f.close()
 
-    # modify fields
-    steer_json["model_name"] = "steering-day-%d-aps-review" % (idx)
-    steer_json["channel_id"] = 1
-    #  accel_json["model_name"] = "accel-day-%d-aps" % (idx)
-    #  accel_json["channel_id"] = 1
-    #  brake_json["model_name"] = "brake-day-%d-aps" % (idx)
-    #  brake_json["channel_id"] = 1
+            print ("ral-experiment-%d:" % (experiment_id))
+            print ("	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) "
+                   "python ./exps/resnet_steering.py with "
+                   "./exps/configs/ral-exps/"+model_base+".json\n")
+            experiment_id += 1
+    # for day
+    for idx in range(1, 16):
+        # for each condition
+        for cond in conditions:
+            # construct file name
+            model_base = \
+                "steering-day-%d-%s-%d" % (idx, cond, trail_idx)
 
-    # write to file
-    with open(join(config_path, "steering"+aps_source_base), "w") as f:
-        json.dump(steer_json, f)
-        f.close()
-    #  with open(join(config_path, "accel"+aps_source_base), "w") as f:
-    #      json.dump(accel_json, f)
-    #      f.close()
-    #  with open(join(config_path, "brake"+aps_source_base), "w") as f:
-    #      json.dump(brake_json, f)
-    #      f.close()
+            steering_dict = {}
+            steering_dict["model_name"] = model_base
+            steering_dict["data_name"] = data_list[idx+14]
+            steering_dict["channel_id"] = channel_options[cond]
+            steering_dict["stages"] = 3
+            steering_dict["blocks"] = 5
+            steering_dict["filter_list"] = \
+                [[16, 16, 16], [32, 32, 32], [64, 64, 64]]
+            steering_dict["nb_epoch"] = 200,
+            steering_dict["batch_size"] = 64
+            steering_dict["frame_cut"] = frame_cuts[idx+14]
 
-# for night, for DVS
-for idx in range(1, 9):
-    source_base = "-night-%d-full.json" % (idx)
-    dvs_source_base = "-night-%d-dvs.json" % (idx)
-    steer_path = os.path.join(config_path, "steering"+source_base)
-    #  accel_path = os.path.join(config_path, "accel"+source_base)
-    #  brake_path = os.path.join(config_path, "brake"+source_base)
+            with open(join(config_path, model_base+".json"), "w") as f:
+                json.dump(steering_dict, f)
+                f.close()
 
-    # open files
-    with open(steer_path, "r") as f:
-        steer_json = json.load(f)
-        f.close()
-    #  with open(accel_path, "r") as f:
-    #      accel_json = json.load(f)
-    #      f.close()
-    #  with open(brake_path, "r") as f:
-    #      brake_json = json.load(f)
-    #      f.close()
-
-    # modify fields
-    steer_json["model_name"] = "steering-night-%d-dvs-review" % (idx)
-    steer_json["channel_id"] = 0
-    #  accel_json["model_name"] = "accel-night-%d-dvs" % (idx)
-    #  accel_json["channel_id"] = 0
-    #  brake_json["model_name"] = "brake-night-%d-dvs" % (idx)
-    #  brake_json["channel_id"] = 0
-
-    # write to file
-    with open(join(config_path, "steering"+dvs_source_base), "w") as f:
-        json.dump(steer_json, f)
-        f.close()
-    #  with open(join(config_path, "accel"+dvs_source_base), "w") as f:
-    #      json.dump(accel_json, f)
-    #      f.close()
-    #  with open(join(config_path, "brake"+dvs_source_base), "w") as f:
-    #      json.dump(brake_json, f)
-    #      f.close()
-
-# for night, for APS
-for idx in range(1, 9):
-    source_base = "-night-%d-full.json" % (idx)
-    aps_source_base = "-night-%d-aps.json" % (idx)
-    steer_path = os.path.join(config_path, "steering"+source_base)
-    #  accel_path = os.path.join(config_path, "accel"+source_base)
-    #  brake_path = os.path.join(config_path, "brake"+source_base)
-
-    # open files
-    with open(steer_path, "r") as f:
-        steer_json = json.load(f)
-        f.close()
-    #  with open(accel_path, "r") as f:
-    #      accel_json = json.load(f)
-    #      f.close()
-    #  with open(brake_path, "r") as f:
-    #      brake_json = json.load(f)
-    #      f.close()
-
-    # modify fields
-    steer_json["model_name"] = "steering-night-%d-aps-review" % (idx)
-    steer_json["channel_id"] = 1
-    #  accel_json["model_name"] = "accel-night-%d-aps" % (idx)
-    #  accel_json["channel_id"] = 1
-    #  brake_json["model_name"] = "brake-night-%d-aps" % (idx)
-    #  brake_json["channel_id"] = 1
-
-    # write to file
-    with open(join(config_path, "steering"+aps_source_base), "w") as f:
-        json.dump(steer_json, f)
-        f.close()
-    #  with open(join(config_path, "accel"+aps_source_base), "w") as f:
-    #      json.dump(accel_json, f)
-    #      f.close()
-    #  with open(join(config_path, "brake"+aps_source_base), "w") as f:
-    #      json.dump(brake_json, f)
-    #      f.close()
+            print ("ral-experiment-%d:" % (experiment_id))
+            print ("	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) "
+                   "python ./exps/resnet_steering.py with "
+                   "./exps/configs/ral-exps/"+model_base+".json\n")
+            experiment_id += 1

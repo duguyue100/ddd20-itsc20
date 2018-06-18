@@ -9,14 +9,10 @@ import os
 from sacred import Experiment
 
 import numpy as np
-from keras.utils.vis_utils import plot_model
-from keras import optimizers
 from keras.callbacks import ModelCheckpoint
-from keras.callbacks import LearningRateScheduler
 from keras.callbacks import CSVLogger
 
 import spiker
-from spiker import log
 from spiker.models import resnet
 from spiker.data import ddd17
 
@@ -39,13 +35,13 @@ exp.add_config({
 def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
                nb_epoch, batch_size, frame_cut):
     """Perform ResNet experiment."""
-    model_path = os.path.join(spiker.SPIKER_EXPS, model_name)
+    model_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps",
+                              model_name)
     if not os.path.isdir(model_path):
         os.makedirs(model_path)
     else:
         raise ValueError("[MESSAGE] This experiment has been done before."
                          " Create a new config model if you need.")
-    model_pic = os.path.join(model_path, model_name+"-model-pic.png")
     model_file_base = os.path.join(model_path, model_name)
 
     # print model info
@@ -56,17 +52,18 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
     print("[MESSAGE] Number of blocks: %d" % (blocks))
 
     # load data
-    data_path = os.path.join(spiker.SPIKER_DATA, "ddd17",
+    data_path = os.path.join(spiker.HOME, "data", "exps", "ddd17",
                              data_name)
     if not os.path.isfile(data_path):
         raise ValueError("This dataset does not exist at %s" % (data_path))
     print("[MESSAGE] Dataset %s" % (data_path))
     assert len(frame_cut) == 2
     print("[MESSAGE] Frame cut: first at %d, last at %d"
-            % (frame_cut[0], -frame_cut[1]))
+          % (frame_cut[0], -frame_cut[1]))
     frames, steering = ddd17.prepare_train_data(
         data_path, y_name="steering",
-        frame_cut=frame_cut)
+        frame_cut=frame_cut,
+        speed_threshold=15.)
     frames /= 255.
     frames -= np.mean(frames, keepdims=True)
     num_samples = frames.shape[0]
@@ -98,32 +95,16 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
         bottleneck=False, network_type="regress")
 
     model.summary()
-    plot_model(model, to_file=model_pic, show_shapes=True,
-               show_layer_names=True)
-
-    # configure optimizer
-    #  def step_decay(epoch):
-    #      "step decay callback."""
-    #      if epoch >= 80 and epoch < 120:
-    #          return float(0.01)
-    #      elif epoch >= 120:
-    #          return float(0.001)
-    #      else:
-    #          return float(0.1)
-
-    #  sgd = optimizers.SGD(lr=0.0, momentum=0.9, nesterov=True)
     model.compile(loss='mean_squared_error',
                   optimizer="adam",
                   metrics=["mse"])
     print ("[MESSAGE] Model is compiled.")
-    model_file = model_file_base + \
-        "-{epoch:02d}-{val_mean_squared_error:.2f}.hdf5"
+    model_file = model_file_base + "-best.hdf5"
     checkpoint = ModelCheckpoint(model_file,
                                  monitor='val_mean_squared_error',
                                  verbose=1,
                                  save_best_only=True,
                                  mode='min')
-    #  scheduler = LearningRateScheduler(step_decay)
 
     csv_his_log = os.path.join(model_path, "csv_history.log")
     csv_logger = CSVLogger(csv_his_log, append=True)
