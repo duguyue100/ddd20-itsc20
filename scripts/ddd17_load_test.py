@@ -5,6 +5,7 @@ Email : duguyue100@gmail.com
 """
 from __future__ import print_function
 import os
+import cv2
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,31 +15,31 @@ from skimage.transform import rotate
 import spiker
 from spiker.data import ddd17
 
-data_path = os.path.join(spiker.SPIKER_DATA, "ddd17",
-                         "aug08/rec1502241196-export.hdf5")
+data_path = os.path.join(spiker.HOME, "data", "exps", "data", "ddd17",
+                         "rec1502338983_export.hdf5")
 
-#  frames, steering = ddd17.prepare_train_data(data_path,
-#                                              #  target_size=None,
-#                                              num_samples=600)
+frames, steering = ddd17.prepare_train_data(data_path, target_size=None)
 steering = ddd17.prepare_train_data(data_path,
                                     y_name="steering",
                                     only_y=True,
-                                    frame_cut=[500, 1000])
+                                    frame_cut=[500, 1000],
+                                    speed_threshold=15)
 
-#  print (frames.shape)
+print (frames.shape)
 print (steering.shape)
 
-#  dvs_mean = frames[..., 0].mean(axis=(1, 2))
-#  dvs_temp = frames[500, :, :, 0]
-#  aps_temp = frames[500, :, :, 1]
-
-#  dvs_temp = dvs_frame[6400]
-#  dvs_temp = (dvs_temp+127).astype("float32").astype("uint8")
-#  dvs_temp = rotate(dvs_temp, angle=180)
+frames /= 255.
+for frame_idx in xrange(frames.shape[0]):
+    cv2.imshow("frame", frames[frame_idx, :, :, 1])
+    cv2.imshow("dvs", frames[frame_idx, :, :, 0])
+    while True:
+        key_paused = cv2.waitKey(1) or 0xff
+        if key_paused == ord(' '):
+            break
 
 plt.figure()
-#  plt.imshow(dvs_temp, cmap="gray")
-plt.plot(steering)
+#  plt.boxplot(steering)
+#  plt.boxplot(speed)
 #  plt.plot(steering[50:-350])
 #  plt.plot(dvs_mean[50:-350])
 plt.show()
