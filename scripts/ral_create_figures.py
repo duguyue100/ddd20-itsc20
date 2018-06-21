@@ -8,7 +8,6 @@ import os
 import cPickle as pickle
 
 import numpy as np
-from sklearn.metrics import explained_variance_score
 
 import matplotlib.pyplot as plt
 
@@ -59,7 +58,6 @@ def get_subset_results(exps_root_path, lighting, num_exps,
                     plt.plot(Y_predict)
                     plt.show()
 
-                    #  eva_score = explained_variance_score(Y_true, Y_predict)
                     eva_score = 1-np.var(Y_true-Y_predict)/np.var(Y_true)
                     result_collector[model_type]["y_true"] = Y_true
                     result_collector[model_type]["y_pred"] = Y_predict
