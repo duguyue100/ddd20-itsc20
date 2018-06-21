@@ -34,7 +34,8 @@ def get_subset_results(exps_root_path, lighting, num_exps,
                 "curves": [],
                 "mins": [],
                 "rmses": [],
-                "eva": []}
+                "eva": [],
+                "true_var": []}
             for trail_idx in range(1, num_trails+1):
                 # construct file name
                 model_base = \
@@ -56,12 +57,15 @@ def get_subset_results(exps_root_path, lighting, num_exps,
                     plt.figure()
                     plt.plot(Y_true)
                     plt.plot(Y_predict)
+                    plt.title(model_base)
                     plt.show()
 
                     eva_score = 1-np.var(Y_true-Y_predict)/np.var(Y_true)
                     result_collector[model_type]["y_true"] = Y_true
                     result_collector[model_type]["y_pred"] = Y_predict
                     result_collector[model_type]["eva"].append(eva_score)
+                    result_collector[model_type]["true_var"].append(
+                        np.std(Y_true))
                     rmse_collector[cond+"_eva"].append(eva_score)
 
                 # read loss
@@ -76,15 +80,16 @@ def get_subset_results(exps_root_path, lighting, num_exps,
                 rmse_collector[cond].append(min_rmse)
             # print 5 trails of each experiments
             if get_eva is False:
-                print ("%s - RMSE mean %.6f %.6f"
+                print ("%s - RMSE mean %.6f %.6f std %.6f"
                        % (model_type,
                           np.mean(result_collector[model_type]["rmses"]),
                           np.std(result_collector[model_type]["rmses"])))
             else:
-                print ("%s - EVA mean %.6f %.6f"
+                print ("%s - EVA mean %.6f %.6f, std %.6f"
                        % (model_type,
                           np.mean(result_collector[model_type]["eva"]),
-                          np.std(result_collector[model_type]["eva"])))
+                          np.std(result_collector[model_type]["eva"]),
+                          np.mean(result_collector[model_type]["true_var"])))
         # print for each condition
         if get_eva is False:
             print ("%s - RMSE mean %.6f %.6f"
