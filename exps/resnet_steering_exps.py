@@ -5,15 +5,15 @@ Email : duguyue100@gmail.com
 """
 from __future__ import print_function
 import os
-import cPickle as pickle
 
 from sacred import Experiment
 
-import h5py
 import numpy as np
-from keras.models import load_model
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import CSVLogger
 
 import spiker
+from spiker.models import resnet
 from spiker.data import ddd17
 
 exp = Experiment("ResNet - Steering - Experiment")
@@ -37,6 +37,11 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
     """Perform ResNet experiment."""
     model_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps",
                               model_name)
+    if not os.path.isdir(model_path):
+        os.makedirs(model_path)
+    else:
+        raise ValueError("[MESSAGE] This experiment has been done before."
+                         " Create a new config model if you need.")
     model_file_base = os.path.join(model_path, model_name)
 
     # print model info
@@ -59,48 +64,57 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
         data_path, y_name="steering",
         frame_cut=[frame_cut[0]*2, frame_cut[1]*2],
         speed_threshold=15.)
-    num_samples = frames.shape[0]
-    num_train = int(num_samples*0.7)
-
-    # save the training files
-    save_path = os.path.join(spiker.HOME, "data", "exps", "data", "ddd17")
-    train_file_name = os.path.join(save_path, model_name+".hdf5")
-    # only save once
-    if not os.path.isfile(train_file_name):
-        save_data = h5py.File(train_file_name, "w")
-        train_group = save_data.create_group("train")
-        test_group = save_data.create_group("test")
-
-        train_group.create_dataset(
-            name="frame", data=frames[:num_train], dtype=np.uint8)
-        train_group.create_dataset(
-            name="steering", data=steering[:num_train], dtype=np.float32)
-
-        test_group.create_dataset(
-            name="frame", data=frames[num_train:], dtype=np.uint8)
-        test_group.create_dataset(
-            name="steering", data=steering[num_train:], dtype=np.float32)
-
-        save_data.flush()
-        save_data.close()
-
     frames /= 255.
     frames -= np.mean(frames, keepdims=True)
+    num_samples = frames.shape[0]
+    num_train = int(num_samples*0.7)
+    X_train = frames[:num_train]
+    Y_train = steering[:num_train]
     X_test = frames[num_train:]
     Y_test = steering[num_train:]
 
     del frames, steering
 
     if channel_id != 2:
+        X_train = X_train[:, :, :, channel_id][..., np.newaxis]
         X_test = X_test[:, :, :, channel_id][..., np.newaxis]
 
     print("[MESSAGE] Number of samples %d" % (num_samples))
+    print("[MESSAGE] Number of train samples %d" % (X_train.shape[0]))
     print("[MESSAGE] Number of test samples %d" % (X_test.shape[0]))
 
+    # setup image shape
+    input_shape = (X_train.shape[1], X_train.shape[2], X_train.shape[3])
+
+    # Build model
+    model = resnet.resnet_builder(
+        model_name=model_name, input_shape=input_shape,
+        batch_size=batch_size,
+        filter_list=filter_list, kernel_size=(3, 3),
+        output_dim=1, stages=stages, blocks=blocks,
+        bottleneck=False, network_type="regress")
+
+    model.summary()
+    model.compile(loss='mean_squared_error',
+                  optimizer="adam",
+                  metrics=["mse"])
+    print ("[MESSAGE] Model is compiled.")
     model_file = model_file_base + "-best.hdf5"
-    model = load_model(model_file)
+    checkpoint = ModelCheckpoint(model_file,
+                                 monitor='val_mean_squared_error',
+                                 verbose=1,
+                                 save_best_only=True,
+                                 mode='min')
 
-    Y_predict = model.predict(X_test)
+    csv_his_log = os.path.join(model_path, "csv_history.log")
+    csv_logger = CSVLogger(csv_his_log, append=True)
 
-    with open(model_file_base+"-prediction.pkl", "wb") as f:
-        pickle.dump([Y_test, Y_predict], f)
+    callbacks_list = [checkpoint, csv_logger]
+
+    # training
+    model.fit(
+        x=X_train, y=Y_train,
+        batch_size=batch_size,
+        epochs=nb_epoch,
+        validation_data=(X_test, Y_test),
+        callbacks=callbacks_list)
