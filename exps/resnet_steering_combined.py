@@ -67,7 +67,7 @@ def resnet_exp(model_name, data_name, channel_id, stages, blocks, filter_list,
             :, :, :, channel_id][()][..., np.newaxis].astype("float32")/255.
     else:
         X_train = dataset["train_data"][()].astype("float32")/255.
-        X_test = dataset["test_datda"][()].astype("float32")/255.
+        X_test = dataset["test_data"][()].astype("float32")/255.
 
     num_samples = X_train.shape[0]
 
