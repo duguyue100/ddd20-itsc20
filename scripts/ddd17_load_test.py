@@ -17,7 +17,7 @@ import spiker
 from spiker.data import ddd17
 
 data_path = os.path.join(spiker.HOME, "data", "exps", "data", "ddd17",
-                         "dataset-1.hdf5")
+                         "all.hdf5")
 
 #  frames, steering = ddd17.prepare_train_data(data_path, target_size=None)
 #  steering = ddd17.prepare_train_data(data_path,
@@ -30,13 +30,12 @@ data = h5py.File(data_path, "r")
 
 print (data["train_data"].shape)
 
-frames = data["train_data"][1000:][()]
+frames = data["train_data"][:1000][()]
 steering = data["test_target"][()]
 
-print (frames.shape)
+#  print (frames.shape)
 print (steering.shape)
 
-#  frames /= 255.
 #  for frame_idx in xrange(frames.shape[0]):
 #      cv2.imshow("frame", frames[frame_idx, :, :, 1])
 #      cv2.imshow("dvs", frames[frame_idx, :, :, 0])
