@@ -48,7 +48,7 @@ for trail_idx in range(1, num_trails+1):
             steering_dict["filter_list"] = \
                 [[16, 16, 16], [32, 32, 32], [64, 64, 64]]
             steering_dict["nb_epoch"] = 200
-            steering_dict["batch_size"] = 64
+            steering_dict["batch_size"] = 128
 
             with open(join(config_path, model_base+".json"), "w") as f:
                 json.dump(steering_dict, f)
