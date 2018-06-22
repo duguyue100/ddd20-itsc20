@@ -14,6 +14,143 @@ clean:
 
 run:
 
+# Additional RAL experiments for combined dataset
+ral-experiment-combined-1:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-full-1.json
+
+ral-experiment-combined-2:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-aps-1.json
+
+ral-experiment-combined-3:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-dvs-1.json
+
+ral-experiment-combined-4:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-full-1.json
+
+ral-experiment-combined-5:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-aps-1.json
+
+ral-experiment-combined-6:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-dvs-1.json
+
+ral-experiment-combined-7:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-full-1.json
+
+ral-experiment-combined-8:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-aps-1.json
+
+ral-experiment-combined-9:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-dvs-1.json
+
+ral-experiment-combined-10:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-full-2.json
+
+ral-experiment-combined-11:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-aps-2.json
+
+ral-experiment-combined-12:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-dvs-2.json
+
+ral-experiment-combined-13:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-full-2.json
+
+ral-experiment-combined-14:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-aps-2.json
+
+ral-experiment-combined-15:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-dvs-2.json
+
+ral-experiment-combined-16:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-full-2.json
+
+ral-experiment-combined-17:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-aps-2.json
+
+ral-experiment-combined-18:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-dvs-2.json
+
+ral-experiment-combined-19:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-full-3.json
+
+ral-experiment-combined-20:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-aps-3.json
+
+ral-experiment-combined-21:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-dvs-3.json
+
+ral-experiment-combined-22:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-full-3.json
+
+ral-experiment-combined-23:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-aps-3.json
+
+ral-experiment-combined-24:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-dvs-3.json
+
+ral-experiment-combined-25:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-full-3.json
+
+ral-experiment-combined-26:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-aps-3.json
+
+ral-experiment-combined-27:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-dvs-3.json
+
+ral-experiment-combined-28:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-full-4.json
+
+ral-experiment-combined-29:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-aps-4.json
+
+ral-experiment-combined-30:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-dvs-4.json
+
+ral-experiment-combined-31:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-full-4.json
+
+ral-experiment-combined-32:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-aps-4.json
+
+ral-experiment-combined-33:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-dvs-4.json
+
+ral-experiment-combined-34:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-full-4.json
+
+ral-experiment-combined-35:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-aps-4.json
+
+ral-experiment-combined-36:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-dvs-4.json
+
+ral-experiment-combined-37:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-full-5.json
+
+ral-experiment-combined-38:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-aps-5.json
+
+ral-experiment-combined-39:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/night-dvs-5.json
+
+ral-experiment-combined-40:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-full-5.json
+
+ral-experiment-combined-41:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-aps-5.json
+
+ral-experiment-combined-42:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/day-dvs-5.json
+
+ral-experiment-combined-43:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-full-5.json
+
+ral-experiment-combined-44:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-aps-5.json
+
+ral-experiment-combined-45:
+	KERAS_BACKEND=tensorflow PYTHONPATH=$(PYTHONPATH) python ./exps/resnet_steering_combined.py with ./exps/configs/ral-exps/all-dvs-5.json
+
+
 # CVPR Experiments
 
 experimental:
