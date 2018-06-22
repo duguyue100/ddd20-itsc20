@@ -12,18 +12,9 @@ import h5py
 
 import spiker
 from spiker.data import ddd17
-import matplotlib.pyplot as plt
 
 data_root_path = os.path.join(
     spiker.HOME, "data", "exps", "data", "ddd17")
-
-num_trails = 5
-
-conditions = ["full", "aps", "dvs"]
-channel_options = {
-    "full": 2,
-    "aps": 1,
-    "dvs": 0}
 
 data_list = [
     "rec1499656391_export.hdf5",
@@ -140,7 +131,7 @@ false_portion = np.sum(
 #  print ("Total number of instances: %d" % (all_train_steering.shape[0]))
 
 # prepare dataset
-for data_idx in xrange(1):
+for data_idx in xrange(30):
     # get path
     data_path = os.path.join(data_root_path, data_list[data_idx])
     print("Reading %s" % (data_path))
