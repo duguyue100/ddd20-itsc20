@@ -30,12 +30,12 @@ data = h5py.File(data_path, "r")
 
 print (data["train_data"].shape)
 
-frames = data["train_data"][:100, ...][()]
+frames = data["train_data"][()]
+steering = data["train_target"][()]
 
 print (frames.shape)
-#  print (steering.shape)
+print (steering.shape)
 
-frames /= 255.
 for frame_idx in xrange(frames.shape[0]):
     cv2.imshow("frame", frames[frame_idx, :, :, 1])
     cv2.imshow("dvs", frames[frame_idx, :, :, 0])
@@ -46,11 +46,8 @@ for frame_idx in xrange(frames.shape[0]):
 
 cv2.destroyAllWindows()
 
-plt.figure()
-#  plt.boxplot(steering)
-#  plt.boxplot(speed)
-#  plt.plot(steering[50:-350])
-#  plt.plot(dvs_mean[50:-350])
-plt.show()
+#  plt.figure()
+#  plt.boxplot(steering/np.pi*180)
+#  plt.show()
 
 data.close()
