@@ -8,6 +8,7 @@ import os
 import cv2
 
 import numpy as np
+import h5py
 import matplotlib.pyplot as plt
 
 from skimage.transform import rotate
@@ -16,17 +17,23 @@ import spiker
 from spiker.data import ddd17
 
 data_path = os.path.join(spiker.HOME, "data", "exps", "data", "ddd17",
-                         "rec1501614399_export.hdf5")
+                         "dataset-1.hdf5")
 
-frames, steering = ddd17.prepare_train_data(data_path, target_size=None)
-steering = ddd17.prepare_train_data(data_path,
-                                    y_name="steering",
-                                    only_y=True,
-                                    frame_cut=[500, 1000],
-                                    speed_threshold=15)
+#  frames, steering = ddd17.prepare_train_data(data_path, target_size=None)
+#  steering = ddd17.prepare_train_data(data_path,
+#                                      y_name="steering",
+#                                      only_y=True,
+#                                      frame_cut=[500, 1000],
+#                                      speed_threshold=15)
+
+data = h5py.File(data_path, "r")
+
+print (data["train_data"].shape)
+
+frames = data["train_data"][:100, ...][()]
 
 print (frames.shape)
-print (steering.shape)
+#  print (steering.shape)
 
 frames /= 255.
 for frame_idx in xrange(frames.shape[0]):
@@ -37,9 +44,13 @@ for frame_idx in xrange(frames.shape[0]):
         if key_paused == ord(' '):
             break
 
+cv2.destroyAllWindows()
+
 plt.figure()
 #  plt.boxplot(steering)
 #  plt.boxplot(speed)
 #  plt.plot(steering[50:-350])
 #  plt.plot(dvs_mean[50:-350])
 plt.show()
+
+data.close()
