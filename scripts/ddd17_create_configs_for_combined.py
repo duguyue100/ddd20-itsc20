@@ -25,9 +25,9 @@ channel_options = {
     "dvs": 0}
 
 data_list = [
-    "night.hdf",
-    "day.hdf",
-    "all.hdf"]
+    "night.hdf5",
+    "day.hdf5",
+    "all.hdf5"]
 
 experiment_id = 1
 for trail_idx in range(1, num_trails+1):
@@ -37,7 +37,7 @@ for trail_idx in range(1, num_trails+1):
         for cond in conditions:
             # construct file name
             model_base = \
-                "%s-%s-%d" % (data_list[idx-1][:-4], cond, trail_idx)
+                "%s-%s-%d" % (data_list[idx-1][:-5], cond, trail_idx)
 
             steering_dict = {}
             steering_dict["model_name"] = model_base
