@@ -8,6 +8,7 @@ import os
 import cPickle as pickle
 
 import numpy as np
+from sklearn.metrics import explained_variance_score, mean_squared_error
 
 import matplotlib.pyplot as plt
 
@@ -51,18 +52,35 @@ def get_subset_results(exps_root_path, lighting,
                 with open(result_path, "rb") as f:
                     data = pickle.load(f)
 
-                Y_true = data[0]
+                Y_true = data[0][:, 0]
                 Y_predict = data[1][:, 0]
 
-                plt.figure()
-                plt.plot(Y_true)
-                plt.plot(Y_predict)
-                plt.title(model_base)
-                plt.show()
+                # try to filter large angle
+                Y_true_mean = np.mean(Y_true)
+                Y_true_std = np.std(Y_true)
+                filter_idx = np.logical_and(
+                    Y_true > (Y_true_mean-3*Y_true_std),
+                    Y_true < (Y_true_mean+3*Y_true_std))
 
-                eva_score = 1-np.var(Y_true-Y_predict)/np.var(Y_true)
-                result_collector[model_type]["y_true"] = Y_true
-                result_collector[model_type]["y_pred"] = Y_predict
+                Y_true = Y_true[filter_idx]
+                Y_predict = Y_predict[filter_idx]
+                time = np.arange(Y_true.shape[0])/20.
+
+                #  plt.figure()
+                #  plt.plot(time, Y_true, "r", label="ground truth")
+                #  plt.plot(time, Y_predict, "g", label="prediction")
+                #  plt.title(model_base)
+                #  plt.xticks(fontsize=16)
+                #  plt.yticks(fontsize=16)
+                #  plt.xlabel("time (s)", fontsize=16)
+                #  plt.ylabel("steering angle (degree)", fontsize=16)
+                #  plt.legend(fontsize=16)
+                #  plt.show()
+
+                #  eva_score = 1-np.var(Y_true-Y_predict)/np.var(Y_true)
+                eva_score = explained_variance_score(Y_true, Y_predict)
+                #  result_collector[model_type]["y_true"] = Y_true
+                #  result_collector[model_type]["y_pred"] = Y_predict
                 result_collector[model_type]["eva"].append(eva_score)
                 result_collector[model_type]["true_var"].append(
                     np.std(Y_true))
@@ -75,6 +93,9 @@ def get_subset_results(exps_root_path, lighting,
             result_collector[model_type]["curves"].append(curve)
             min_mse = np.min(curve[:, 4])
             min_rmse = np.sqrt(min_mse)*180/np.pi
+            if get_eva is True:
+                min_rmse = mean_squared_error(Y_true, Y_predict)
+                min_rmse = np.sqrt(min_rmse)*180/np.pi
             result_collector[model_type]["mins"].append(min_mse)
             result_collector[model_type]["rmses"].append(min_rmse)
             rmse_collector[cond].append(min_rmse)
@@ -86,8 +107,11 @@ def get_subset_results(exps_root_path, lighting,
                       np.mean(result_collector[model_type]["rmses"]),
                       np.std(result_collector[model_type]["rmses"])))
         else:
-            print ("%s - EVA mean %.6f %.6f, std %.6f"
+            print ("%s - RMSE mean %.6f %.6f, EVA mean %.6f %.6f, std: %.6f"
+            #  print ("%.6f,%.6f,%.6f,%.6f"
                    % (model_type,
+                      np.mean(result_collector[model_type]["rmses"]),
+                      np.std(result_collector[model_type]["rmses"]),
                       np.mean(result_collector[model_type]["eva"]),
                       np.std(result_collector[model_type]["eva"]),
                       np.mean(result_collector[model_type]["true_var"])))
@@ -104,7 +128,7 @@ def get_subset_results(exps_root_path, lighting,
     return result_collector, rmse_collector
 
 
-def get_results(exps_root_path, get_eva=False):
+def get_results(exps_root_path, get_eva=True):
     """Get results."""
 
     night_results, night_rmse = get_subset_results(
@@ -125,8 +149,11 @@ def get_results(exps_root_path, get_eva=False):
                    % (cond, np.mean(rmse_collector[cond]),
                       np.std(rmse_collector[cond])))
         else:
-            print ("All experiments - EVA - %s - %.6f %.6f"
-                   % (cond, np.mean(rmse_collector[cond+"_eva"]),
+            print ("All experiments-%s-RMSE - %.6f - %.6f - EVA - %.6f %.6f"
+                   % (cond,
+                      np.mean(rmse_collector[cond]),
+                      np.std(rmse_collector[cond]),
+                      np.mean(rmse_collector[cond+"_eva"]),
                       np.std(rmse_collector[cond+"_eva"])))
 
     return night_results, day_results, rmse_collector
