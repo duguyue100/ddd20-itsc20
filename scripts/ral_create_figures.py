@@ -208,6 +208,9 @@ elif options == "get-result-cut":
 
     print ("number of instance: %d" % (num_samples))
     print ("length of recording: %d" % (data_length))
+    all_tested_y = all_y["full_gt"][all_y["full_fi"]]
+    no_prediction = np.sqrt(np.mean(all_tested_y**2))/np.pi*180
+    print ("Random prediction: %.2f" % (no_prediction))
 
     # steering time
     steer_time = np.arange(data_length)/20.
@@ -230,7 +233,7 @@ elif options == "get-result-cut":
     full_std_res = full_std_res/np.pi*180
 
     # producing figures
-    fig = plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(16, 8))
     outer_grid = gridspec.GridSpec(2, 1, wspace=0.1)
 
     # plot frames
@@ -240,12 +243,12 @@ elif options == "get-result-cut":
     aps_frame = plt.Subplot(fig, frame_grid[0])
     aps_frame.imshow(frames[idx, :, :, 1], cmap="gray")
     aps_frame.axis("off")
-    aps_frame.set_title("APS Frame")
+    aps_frame.set_title("APS Frame", fontsize=16)
     fig.add_subplot(aps_frame)
     dvs_frame = plt.Subplot(fig, frame_grid[1])
     dvs_frame.imshow(frames[idx, :, :, 0], cmap="gray")
     dvs_frame.axis("off")
-    dvs_frame.set_title("DVS Frame")
+    dvs_frame.set_title("DVS Frame", fontsize=16)
     fig.add_subplot(dvs_frame)
 
     inner_grid = gridspec.GridSpecFromSubplotSpec(
@@ -288,13 +291,14 @@ elif options == "get-result-cut":
                         linewidth=2)
     steering_curve.plot((steer_time[idx], steer_time[idx]),
                         (min_steer, max_steer), color="black",
-                        linestyle="-", linewidth=1)
+                        linestyle="-", linewidth=2)
     steering_curve.set_xlim(left=0, right=steer_time[-1])
-    steering_curve.set_title("Steering Wheel Angle Prediction")
+    steering_curve.set_title("Steering Wheel Angle Prediction", fontsize=16)
     steering_curve.grid(linestyle="-.")
     steering_curve.legend(fontsize=16)
     steering_curve.set_ylabel("degree", fontsize=16)
     steering_curve.set_xlabel("time (s)", fontsize=16)
+    steering_curve.tick_params(labelsize=16)
     fig.add_subplot(steering_curve)
 
     outer_grid.tight_layout(fig)
