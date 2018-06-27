@@ -57,7 +57,12 @@ def plot_steering_wheel(img, steer_angles, colors=[(8, 48, 107)],
 
 
 def get_subset_results(exps_root_path, lighting,
-                       get_eva=False, plotting=False):
+                       get_eva=False, plotting=False,
+                       exclude_low_speed=True):
+    # read high speed idx
+    with open(os.path.join(exps_root_path, "high-speed-idx.pkl"), "r") as f:
+        high_speed_idx = pickle.load(f)
+        f.close()
     result_collector = {}
     rmse_collector = {}
     y_collector = {}
@@ -97,6 +102,22 @@ def get_subset_results(exps_root_path, lighting,
                 filter_idx = np.logical_and(
                     Y_true > (Y_true_mean-3*Y_true_std),
                     Y_true < (Y_true_mean+3*Y_true_std))
+                if exclude_low_speed is True:
+                    if lighting == "night":
+                        filter_idx = np.logical_and(
+                            filter_idx,
+                            high_speed_idx[:filter_idx.shape[0]])
+                    elif lighting == "day":
+                        filter_idx = np.logical_and(
+                            filter_idx,
+                            high_speed_idx[-filter_idx.shape[0]:])
+                    elif lighting == "all":
+                        filter_idx = np.logical_and(
+                            filter_idx, high_speed_idx)
+
+                # filtering
+                #  Y_true = Y_true[filter_idx]
+                #  Y_predict = Y_predict[filter_idx]
 
                 eva_score = explained_variance_score(Y_true, Y_predict)
                 result_collector[model_type]["eva"].append(eva_score)
@@ -195,9 +216,10 @@ def get_results(exps_root_path, get_eva=True):
     return night_results, day_results, all_results, rmse_collector
 
 
-# options = "get-mean-std"
-# options = "get-result-cut"
-options = "investigate-examples"
+#  options = "get-mean-std"
+#  options = "get-result-cut"
+#  options = "investigate-examples"
+options = "get-intensity-plot"
 
 if options == "get-mean-std":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
@@ -424,3 +446,60 @@ elif options == "investigate-examples":
                   (abs(full_res[idx]-aps_res[idx])))
         plt.axis("off")
         plt.show()
+
+elif options == "get-intensity-plot":
+    data_root_path = os.path.join(
+        spiker.HOME, "data", "exps", "data", "ddd17")
+    num_samples = 0
+
+    recording_idx = 30
+    idx = 700
+
+    night_mean_intensity = np.zeros((0,))
+    day_mean_intensity = np.zeros((0,))
+    for data_idx in xrange(1, recording_idx+1):
+        data_path = os.path.join(
+            data_root_path, "dataset-%d.hdf5" % (data_idx))
+
+        # open file
+        test_data = h5py.File(data_path, "r")
+
+        print ("Processing dataset %d" % (data_idx))
+
+        # get number of test result
+        frames = test_data["test_data"][..., 1][()]
+
+        test_data.close()
+
+        # compute average mean intensity for every APS frame
+        mean_intensity = np.mean(frames[:, :-30, :], axis=(1, 2))
+        if data_idx <= 15:
+            night_mean_intensity = np.append(
+                night_mean_intensity, mean_intensity)
+        else:
+            day_mean_intensity = np.append(
+                day_mean_intensity, mean_intensity)
+
+    print ("number of instance: %d" % (
+        night_mean_intensity.shape[0] +
+        day_mean_intensity.shape[0]))
+
+    fig = plt.figure()
+    fig.add_subplot(1, 2, 1)
+    plt.hist([night_mean_intensity, day_mean_intensity],
+             bins=32, alpha=0.8,
+             edgecolor='black', linewidth=1.2,
+             label=["night", "day"])
+    plt.xlabel("intensity values", fontsize=16)
+    plt.ylabel("frame count", fontsize=16)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.legend(fontsize=16)
+
+    fig.add_subplot(1, 2, 2)
+    plt.boxplot([night_mean_intensity, day_mean_intensity])
+    plt.ylabel("intensity values", fontsize=16)
+    plt.xticks([1, 2], ["night", "day"], fontsize=16)
+    plt.yticks(fontsize=16)
+
+    plt.show()
