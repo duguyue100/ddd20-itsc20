@@ -8,6 +8,8 @@ import os
 import cPickle as pickle
 import h5py
 
+import cv2
+
 import numpy as np
 from sklearn.metrics import explained_variance_score, mean_squared_error
 
@@ -22,6 +24,36 @@ channel_options = {
     "full": 2,
     "aps": 1,
     "dvs": 0}
+
+CV_AA = cv2.LINE_AA if int(cv2.__version__[0]) > 2 else cv2.CV_AA
+
+
+def plot_steering_wheel(img, steer_angles, colors=[(8, 48, 107)],
+                        thickness=[2], speed=0):
+    """draw angles based on a list of predictions."""
+    c, r = (172, 128), 64  # center, radius
+    for angle_idx in xrange(len(steer_angles)):
+        a = steer_angles[angle_idx]
+        a_rad = + a / 180. * np.pi + np.pi / 2
+        a_rad = np.pi-a_rad
+        t = (c[0] + int(np.cos(a_rad) * r), c[1] - int(np.sin(a_rad) * r))
+        cv2.line(img, c, t, colors[angle_idx],
+                 thickness[angle_idx], CV_AA)
+    cv2.circle(img, c, r, (244, 66, 66), 1, CV_AA)
+    # the label
+    cv2.line(img, (c[0]-r+5, c[1]), (c[0]-r, c[1]), (244, 66, 66), 1, CV_AA)
+    cv2.line(img, (c[0]+r-5, c[1]), (c[0]+r, c[1]), (244, 66, 66), 1, CV_AA)
+    cv2.line(img, (c[0], c[1]-r+5), (c[0], c[1]-r), (244, 66, 66), 1, CV_AA)
+    cv2.line(img, (c[0], c[1]+r-5), (c[0], c[1]+r), (244, 66, 66), 1, CV_AA)
+    cv2.putText(
+        img,
+        'gt: %0.1f deg DVS+APS: %.1f deg APS: %.1f deg' %
+        (steer_angles[0], steer_angles[1], steer_angles[2]),
+        (c[0]-144, c[1]+84), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (244, 66, 66),
+        1, CV_AA)
+    #  cv2.putText(img, '%d %s' % (speed, "km/h"), (160, 240),
+    #              cv2.FONT_HERSHEY_SIMPLEX, 0.4, (80, 244, 66), 1, CV_AA)
+    return img
 
 
 def get_subset_results(exps_root_path, lighting,
@@ -163,8 +195,9 @@ def get_results(exps_root_path, get_eva=True):
     return night_results, day_results, all_results, rmse_collector
 
 
-#  options = "get-mean-std"
-options = "get-result-cut"
+# options = "get-mean-std"
+# options = "get-result-cut"
+options = "investigate-examples"
 
 if options == "get-mean-std":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
@@ -309,3 +342,85 @@ elif options == "get-result-cut":
     #                   "vis"+model_base+"result"+".pdf"),
     #              dpi=600, format="pdf",
     #              bbox="tight", pad_inches=0.5)
+elif options == "investigate-examples":
+    exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
+    #  night_results, night_rmse, night_y = get_subset_results(
+    #      exps_root_path, "night", get_eva=True)
+    #  day_results, day_rmse, day_y = get_subset_results(
+    #      exps_root_path, "day", get_eva=True)
+    all_results, all_rmse, all_y = get_subset_results(
+        exps_root_path, "all", get_eva=True)
+
+    data_root_path = os.path.join(
+        spiker.HOME, "data", "exps", "data", "ddd17")
+    num_samples = 0
+
+    recording_idx = 30
+    idx = 700
+
+    for data_idx in xrange(1, recording_idx+1):
+        data_path = os.path.join(
+            data_root_path, "dataset-%d.hdf5" % (data_idx))
+
+        # open file
+        test_data = h5py.File(data_path, "r")
+
+        # get number of test result
+        test_target = test_data["test_target"][()]
+        num_targets = test_target.shape[0]
+
+        if data_idx == recording_idx:
+            frames = test_data["test_data"][()]
+
+        if data_idx != recording_idx:
+            num_samples += num_targets
+        else:
+            data_length = num_targets
+
+    print ("number of instance: %d" % (num_samples))
+    print ("length of recording: %d" % (data_length))
+
+    # steering time
+    dvs_mean_res = all_y["dvs_pred"][num_samples:(num_samples+data_length)]
+    dvs_std_res = all_y["dvs_pred_std"][num_samples:(num_samples+data_length)]
+    aps_mean_res = all_y["aps_pred"][num_samples:(num_samples+data_length)]
+    aps_std_res = all_y["aps_pred_std"][num_samples:(num_samples+data_length)]
+    full_mean_res = all_y["full_pred"][num_samples:(num_samples+data_length)]
+    full_std_res = \
+        all_y["full_pred_std"][num_samples:(num_samples+data_length)]
+    steering = all_y["full_gt"][num_samples:(num_samples+data_length)]
+
+    # find the compare case for APS and combined
+    error_full = np.sqrt((full_mean_res-steering)**2)/np.pi*180.
+    error_aps = np.sqrt((aps_mean_res-steering)**2)/np.pi*180.
+
+    compare_idx = np.abs(error_full-error_aps) > 8
+
+    print ("Number of compare cases: %d" % (np.sum(compare_idx)))
+
+    frames = frames[compare_idx]
+    gt_res = steering[compare_idx]/np.pi*180.
+    full_res = full_mean_res[compare_idx]/np.pi*180.
+    aps_res = aps_mean_res[compare_idx]/np.pi*180.
+
+    for idx in xrange(frames.shape[0]):
+        fig = plt.figure()
+        image = np.stack((frames[idx, ..., 1].astype("uint8"),)*3, -1)
+        image = cv2.resize(image, (image.shape[1]*2, image.shape[0]*2))
+        image = plot_steering_wheel(
+            image, [gt_res[idx], full_res[idx], aps_res[idx]],
+            colors=[(8, 48, 107), (127, 39, 4), (0, 68, 27)],
+            thickness=[2, 1, 1])
+        fig.add_subplot(1, 2, 1)
+        plt.imshow(image)
+        plt.title("Dataset-%d" % (recording_idx))
+        plt.axis("off")
+        fig.add_subplot(1, 2, 2)
+        image_dvs = frames[idx, ..., 0].astype("uint8")
+        image_dvs = cv2.resize(image_dvs,
+                               (image_dvs.shape[1]*2, image_dvs.shape[0]*2))
+        plt.imshow(image_dvs, cmap="gray")
+        plt.title("Difference: %.2f degree" %
+                  (abs(full_res[idx]-aps_res[idx])))
+        plt.axis("off")
+        plt.show()
