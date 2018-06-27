@@ -85,7 +85,7 @@ def plot_steering_wheel(img, steer_angles, colors=[(8, 48, 107)],
 
 def get_subset_results(exps_root_path, lighting,
                        get_eva=False, plotting=False,
-                       exclude_low_speed=True):
+                       exclude_low_speed=False):
     # read high speed idx
     with open(os.path.join(exps_root_path, "high-speed-idx.pkl"), "r") as f:
         high_speed_idx = pickle.load(f)
@@ -104,7 +104,11 @@ def get_subset_results(exps_root_path, lighting,
             "mins": [],
             "rmses": [],
             "eva": [],
-            "true_var": []}
+            "true_var": [],
+            "eva_all_night": [],
+            "eva_all_day": [],
+            "rmses_all_night": [],
+            "rmses_all_day": []}
         for trail_idx in range(1, num_trails+1):
             # construct file name
             model_base = \
@@ -133,18 +137,52 @@ def get_subset_results(exps_root_path, lighting,
                     if lighting == "night":
                         filter_idx = np.logical_and(
                             filter_idx,
-                            high_speed_idx[:filter_idx.shape[0]])
+                            high_speed_idx[:Y_true.shape[0]])
                     elif lighting == "day":
                         filter_idx = np.logical_and(
                             filter_idx,
-                            high_speed_idx[-filter_idx.shape[0]:])
+                            high_speed_idx[-Y_true.shape[0]:])
                     elif lighting == "all":
                         filter_idx = np.logical_and(
                             filter_idx, high_speed_idx)
 
+                if lighting == "all":
+                    Y_true_night = Y_true[:52388]
+                    Y_true_day = Y_true[52388:]
+                    Y_predict_night = Y_predict[:52388]
+                    Y_predict_day = Y_predict[52388:]
+
+                    filter_idx_night = filter_idx[:52388]
+                    filter_idx_day = filter_idx[52388:]
+
+                    Y_true_night = Y_true_night[filter_idx_night]
+                    Y_true_day = Y_true_day[filter_idx_day]
+                    Y_predict_night = Y_predict_night[filter_idx_night]
+                    Y_predict_day = Y_predict_day[filter_idx_day]
+
+                    eva_score_night = explained_variance_score(
+                        Y_true_night, Y_predict_night)
+                    eva_score_day = explained_variance_score(
+                        Y_true_day, Y_predict_day)
+                    min_rmse_night = mean_squared_error(
+                        Y_true_night, Y_predict_night)
+                    min_rmse_night = np.sqrt(min_rmse_night)/np.pi*180.
+                    min_rmse_day = mean_squared_error(
+                        Y_true_day, Y_predict_day)
+                    min_rmse_day = np.sqrt(min_rmse_day)/np.pi*180.
+
+                    result_collector[model_type]["eva_all_night"].append(
+                        eva_score_night)
+                    result_collector[model_type]["eva_all_day"].append(
+                        eva_score_day)
+                    result_collector[model_type]["rmses_all_night"].append(
+                        min_rmse_night)
+                    result_collector[model_type]["rmses_all_day"].append(
+                        min_rmse_day)
+
                 # filtering
-                #  Y_true = Y_true[filter_idx]
-                #  Y_predict = Y_predict[filter_idx]
+                Y_true = Y_true[filter_idx]
+                Y_predict = Y_predict[filter_idx]
 
                 eva_score = explained_variance_score(Y_true, Y_predict)
                 result_collector[model_type]["eva"].append(eva_score)
@@ -183,6 +221,21 @@ def get_subset_results(exps_root_path, lighting,
                       np.mean(result_collector[model_type]["eva"]),
                       np.std(result_collector[model_type]["eva"]),
                       np.mean(result_collector[model_type]["true_var"])))
+            if lighting == "all":
+                print (
+                    "%.6f %.6f %.6f %.6f"
+                    % (#model_type+"night",
+                       np.mean(result_collector[model_type]["rmses_all_night"]),
+                       np.std(result_collector[model_type]["rmses_all_night"]),
+                       np.mean(result_collector[model_type]["eva_all_night"]),
+                       np.std(result_collector[model_type]["eva_all_night"])))
+                print (
+                    "%.6f %.6f %.6f %.6f"
+                    % (#model_type+"day",
+                       np.mean(result_collector[model_type]["rmses_all_day"]),
+                       np.std(result_collector[model_type]["rmses_all_day"]),
+                       np.mean(result_collector[model_type]["eva_all_day"]),
+                       np.std(result_collector[model_type]["eva_all_day"])))
 
     for cond in conditions:
         arr_pred = np.array(y_collector[cond+"_pred"])
@@ -243,11 +296,11 @@ def get_results(exps_root_path, get_eva=True):
     return night_results, day_results, all_results, rmse_collector
 
 
-#  options = "get-mean-std"
+options = "get-mean-std"
 #  options = "get-result-cut"
 #  options = "investigate-examples"
 #  options = "get-intensity-plot"
-options = "export-video"
+#  options = "export-video"
 
 if options == "get-mean-std":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
