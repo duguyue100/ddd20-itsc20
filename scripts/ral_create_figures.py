@@ -296,11 +296,11 @@ def get_results(exps_root_path, get_eva=True):
     return night_results, day_results, all_results, rmse_collector
 
 
-options = "get-mean-std"
+#  options = "get-mean-std"
 #  options = "get-result-cut"
 #  options = "investigate-examples"
 #  options = "get-intensity-plot"
-#  options = "export-video"
+options = "export-video"
 
 if options == "get-mean-std":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
@@ -537,7 +537,7 @@ elif options == "export-video":
         spiker.HOME, "data", "exps", "data", "ddd17")
     num_samples = 0
 
-    recording_idx = 19
+    recording_idx = 1
 
     for data_idx in xrange(1, recording_idx+1):
         data_path = os.path.join(
@@ -692,7 +692,7 @@ elif options == "export-video":
         data_buffer = data_buffer.reshape(
             fig.canvas.get_width_height()[::-1] + (3,))
 
-        fig.clear()
+        fig.close()
 
         return data_buffer
 
