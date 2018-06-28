@@ -5,6 +5,7 @@ Email : yuhuang.hu@ini.uzh.ch
 """
 from __future__ import print_function, absolute_import
 import os
+import gc
 import cPickle as pickle
 import h5py
 
@@ -85,7 +86,7 @@ def plot_steering_wheel(img, steer_angles, colors=[(8, 48, 107)],
 
 def get_subset_results(exps_root_path, lighting,
                        get_eva=False, plotting=False,
-                       exclude_low_speed=False):
+                       exclude_low_speed=True):
     # read high speed idx
     with open(os.path.join(exps_root_path, "high-speed-idx.pkl"), "r") as f:
         high_speed_idx = pickle.load(f)
@@ -181,8 +182,8 @@ def get_subset_results(exps_root_path, lighting,
                         min_rmse_day)
 
                 # filtering
-                Y_true = Y_true[filter_idx]
-                Y_predict = Y_predict[filter_idx]
+                #  Y_true = Y_true[filter_idx]
+                #  Y_predict = Y_predict[filter_idx]
 
                 eva_score = explained_variance_score(Y_true, Y_predict)
                 result_collector[model_type]["eva"].append(eva_score)
@@ -537,7 +538,7 @@ elif options == "export-video":
         spiker.HOME, "data", "exps", "data", "ddd17")
     num_samples = 0
 
-    recording_idx = 1
+    recording_idx = 30
 
     for data_idx in xrange(1, recording_idx+1):
         data_path = os.path.join(
@@ -550,157 +551,160 @@ elif options == "export-video":
         test_target = test_data["test_target"][()]
         num_targets = test_target.shape[0]
 
-        if data_idx == recording_idx:
-            frames = test_data["test_data"][()]
+        #  if data_idx == recording_idx:
+        frames = test_data["test_data"][()]
+        test_data.close()
 
-        if data_idx != recording_idx:
-            num_samples += num_targets
-        else:
-            data_length = num_targets
+        #  if data_idx != recording_idx:
+        #  else:
+        data_length = num_targets
 
-    print ("number of instance: %d" % (num_samples))
-    print ("length of recording: %d" % (data_length))
+        print ("number of instance: %d" % (num_samples))
+        print ("length of recording: %d" % (data_length))
 
-    # steering time
-    steer_time = np.arange(data_length)/20.
-    dvs_mean_res = all_y["dvs_pred"][num_samples:(num_samples+data_length)]
-    dvs_std_res = all_y["dvs_pred_std"][num_samples:(num_samples+data_length)]
-    aps_mean_res = all_y["aps_pred"][num_samples:(num_samples+data_length)]
-    aps_std_res = all_y["aps_pred_std"][num_samples:(num_samples+data_length)]
-    full_mean_res = all_y["full_pred"][num_samples:(num_samples+data_length)]
-    full_std_res = \
-        all_y["full_pred_std"][num_samples:(num_samples+data_length)]
-    steering = all_y["full_gt"][num_samples:(num_samples+data_length)]
-    filter_idx = all_y["full_fi"][num_samples:(num_samples+data_length)]
-    filter_idx = np.logical_not(filter_idx)
+        # steering time
+        steer_time = np.arange(data_length)/20.
+        dvs_mean_res = all_y["dvs_pred"][num_samples:(num_samples+data_length)]
+        dvs_std_res = all_y["dvs_pred_std"][num_samples:(num_samples+data_length)]
+        aps_mean_res = all_y["aps_pred"][num_samples:(num_samples+data_length)]
+        aps_std_res = all_y["aps_pred_std"][num_samples:(num_samples+data_length)]
+        full_mean_res = all_y["full_pred"][num_samples:(num_samples+data_length)]
+        full_std_res = \
+            all_y["full_pred_std"][num_samples:(num_samples+data_length)]
+        steering = all_y["full_gt"][num_samples:(num_samples+data_length)]
+        filter_idx = all_y["full_fi"][num_samples:(num_samples+data_length)]
+        filter_idx = np.logical_not(filter_idx)
 
-    # rescale
-    dvs_mean_res = dvs_mean_res/np.pi*180
-    dvs_std_res = dvs_std_res/np.pi*180
-    aps_mean_res = aps_mean_res/np.pi*180
-    aps_std_res = aps_std_res/np.pi*180
-    full_mean_res = full_mean_res/np.pi*180
-    full_std_res = full_std_res/np.pi*180
-    steering = steering/np.pi*180.
-    min_steer = np.min(steering)*1.2
-    max_steer = np.max(steering)*1.2
+        num_samples += num_targets
 
-    # video properties
-    fps = 20
-    fast_forward = 2
-    duration = steering.shape[0]/(float(fps)*fast_forward)
+        # rescale
+        dvs_mean_res = dvs_mean_res/np.pi*180
+        dvs_std_res = dvs_std_res/np.pi*180
+        aps_mean_res = aps_mean_res/np.pi*180
+        aps_std_res = aps_std_res/np.pi*180
+        full_mean_res = full_mean_res/np.pi*180
+        full_std_res = full_std_res/np.pi*180
+        steering = steering/np.pi*180.
+        min_steer = np.min(steering)*1.2
+        max_steer = np.max(steering)*1.2
 
-    # make video frame
-    def make_aps_dvs_frame(t):
-        """Make aps and dvs combined frame."""
-        # identify frame name
-        idx = int(t*fps*fast_forward)
+        # video properties
+        fps = 20
+        fast_forward = 2
+        duration = steering.shape[0]/(float(fps)*fast_forward)
 
-        # producing figures
-        outer_grid = gridspec.GridSpec(2, 1, wspace=0.1)
+        # make video frame
+        def make_aps_dvs_frame(t):
+            """Make aps and dvs combined frame."""
+            # identify frame name
+            idx = int(t*fps*fast_forward)
 
-        # plot frames
-        fig = plt.figure(figsize=(12, 9))
-        frame_grid = gridspec.GridSpecFromSubplotSpec(
-            1, 2, subplot_spec=outer_grid[0, 0],
-            hspace=0.1)
+            # producing figures
+            outer_grid = gridspec.GridSpec(2, 1, wspace=0.1)
 
-        # draw aps frame
-        aps_frame = plt.Subplot(fig, frame_grid[0])
-        aps_f = np.stack((frames[idx, ..., 1].astype("uint8"),)*3, -1)
-        aps_f = cv2.resize(
-            aps_f, (aps_f.shape[1]*2, aps_f.shape[0]*2))
-        aps_f = plot_steering_wheel(
-            aps_f, [steering[idx], full_mean_res[idx], aps_mean_res[idx]],
-            colors=[(8, 48, 107), (127, 39, 4), (0, 68, 27)],
-            thickness=[2, 1, 1])
-        aps_frame.imshow(aps_f)
-        aps_frame.axis("off")
-        aps_frame.set_title("APS Frame", fontsize=16)
-        fig.add_subplot(aps_frame)
-        # draw dvs frame
-        dvs_frame = plt.Subplot(fig, frame_grid[1])
-        dvs_f = np.stack((frames[idx, ..., 0].astype("uint8"),)*3, -1)
-        dvs_f = cv2.resize(
-            dvs_f, (dvs_f.shape[1]*2, dvs_f.shape[0]*2))
-        dvs_f = plot_steering_wheel(
-            dvs_f, [steering[idx], dvs_mean_res[idx]],
-            colors=[(8, 48, 107), (63, 0, 125)],
-            thickness=[2, 1], plot_dvs=True)
-        dvs_frame.imshow(dvs_f)
-        dvs_frame.axis("off")
-        dvs_frame.set_title("DVS Frame", fontsize=16)
-        fig.add_subplot(dvs_frame)
+            # plot frames
+            fig = plt.figure(figsize=(12, 9))
+            frame_grid = gridspec.GridSpecFromSubplotSpec(
+                1, 2, subplot_spec=outer_grid[0, 0],
+                hspace=0.1)
 
-        inner_grid = gridspec.GridSpecFromSubplotSpec(
-            1, 1, subplot_spec=outer_grid[1, 0])
-        # plot steering curve
-        steering_curve = plt.Subplot(fig, inner_grid[0, 0])
-        steering_curve.plot(steer_time, dvs_mean_res,
-                            label="DVS",
-                            color="#3f007d",
-                            linestyle="-",
-                            linewidth=1)
-        steering_curve.fill_between(
-            steer_time, dvs_mean_res+dvs_std_res,
-            dvs_mean_res-dvs_std_res, facecolor="#3f007d",
-            alpha=0.3)
-        steering_curve.plot(steer_time, aps_mean_res,
-                            label="APS",
-                            color="#00441b",
-                            linestyle="-",
-                            linewidth=1)
-        steering_curve.fill_between(
-            steer_time, aps_mean_res+aps_std_res,
-            aps_mean_res-aps_std_res, facecolor="#00441b",
-            alpha=0.3)
-        steering_curve.plot(steer_time, full_mean_res,
-                            label="DVS+APS",
-                            color="#7f2704",
-                            linestyle="-",
-                            linewidth=1)
-        steering_curve.fill_between(
-            steer_time, full_mean_res+full_std_res,
-            full_mean_res-full_std_res, facecolor="#7f2704",
-            alpha=0.3)
-        steering_curve.plot(steer_time, steering,
-                            label="groundtruth",
-                            color="#08306b",
-                            linestyle="-",
-                            linewidth=2)
-        steering_curve.axvspan(steer_time[idx], steer_time[idx],
-                               color="black")
-        steering_curve.fill_between(
-            steer_time, min_steer, max_steer, where=filter_idx, alpha=0.3)
-        steering_curve.set_xlim(left=0, right=steer_time[-1])
-        steering_curve.set_title(
-            "Steering Wheel Angle Prediction\n"
-            "Predictions in shaded area (if any) are not included",
-            fontsize=12)
-        steering_curve.grid(linestyle="-.")
-        steering_curve.legend(fontsize=12)
-        steering_curve.set_ylabel("degree", fontsize=16)
-        steering_curve.set_xlabel("time (s)", fontsize=16)
-        steering_curve.tick_params(labelsize=16)
-        fig.add_subplot(steering_curve)
+            # draw aps frame
+            aps_frame = plt.Subplot(fig, frame_grid[0])
+            aps_f = np.stack((frames[idx, ..., 1].astype("uint8"),)*3, -1)
+            aps_f = cv2.resize(
+                aps_f, (aps_f.shape[1]*2, aps_f.shape[0]*2))
+            aps_f = plot_steering_wheel(
+                aps_f, [steering[idx], full_mean_res[idx], aps_mean_res[idx]],
+                colors=[(8, 48, 107), (127, 39, 4), (0, 68, 27)],
+                thickness=[2, 1, 1])
+            aps_frame.imshow(aps_f)
+            aps_frame.axis("off")
+            aps_frame.set_title("APS Frame", fontsize=16)
+            fig.add_subplot(aps_frame)
+            # draw dvs frame
+            dvs_frame = plt.Subplot(fig, frame_grid[1])
+            dvs_f = np.stack((frames[idx, ..., 0].astype("uint8"),)*3, -1)
+            dvs_f = cv2.resize(
+                dvs_f, (dvs_f.shape[1]*2, dvs_f.shape[0]*2))
+            dvs_f = plot_steering_wheel(
+                dvs_f, [steering[idx], dvs_mean_res[idx]],
+                colors=[(8, 48, 107), (63, 0, 125)],
+                thickness=[2, 1], plot_dvs=True)
+            dvs_frame.imshow(dvs_f)
+            dvs_frame.axis("off")
+            dvs_frame.set_title("DVS Frame", fontsize=16)
+            fig.add_subplot(dvs_frame)
 
-        outer_grid.tight_layout(fig)
+            inner_grid = gridspec.GridSpecFromSubplotSpec(
+                1, 1, subplot_spec=outer_grid[1, 0])
+            # plot steering curve
+            steering_curve = plt.Subplot(fig, inner_grid[0, 0])
+            steering_curve.plot(steer_time, dvs_mean_res,
+                                label="DVS",
+                                color="#3f007d",
+                                linestyle="-",
+                                linewidth=1)
+            steering_curve.fill_between(
+                steer_time, dvs_mean_res+dvs_std_res,
+                dvs_mean_res-dvs_std_res, facecolor="#3f007d",
+                alpha=0.3)
+            steering_curve.plot(steer_time, aps_mean_res,
+                                label="APS",
+                                color="#00441b",
+                                linestyle="-",
+                                linewidth=1)
+            steering_curve.fill_between(
+                steer_time, aps_mean_res+aps_std_res,
+                aps_mean_res-aps_std_res, facecolor="#00441b",
+                alpha=0.3)
+            steering_curve.plot(steer_time, full_mean_res,
+                                label="DVS+APS",
+                                color="#7f2704",
+                                linestyle="-",
+                                linewidth=1)
+            steering_curve.fill_between(
+                steer_time, full_mean_res+full_std_res,
+                full_mean_res-full_std_res, facecolor="#7f2704",
+                alpha=0.3)
+            steering_curve.plot(steer_time, steering,
+                                label="groundtruth",
+                                color="#08306b",
+                                linestyle="-",
+                                linewidth=2)
+            steering_curve.axvspan(steer_time[idx], steer_time[idx],
+                                   color="black")
+            steering_curve.fill_between(
+                steer_time, min_steer, max_steer, where=filter_idx, alpha=0.3)
+            steering_curve.set_xlim(left=0, right=steer_time[-1])
+            steering_curve.set_title(
+                "Steering Wheel Angle Prediction",
+                fontsize=12)
+            steering_curve.grid(linestyle="-.")
+            steering_curve.legend(fontsize=12)
+            steering_curve.set_ylabel("degree", fontsize=16)
+            steering_curve.set_xlabel("time (s)", fontsize=16)
+            steering_curve.tick_params(labelsize=16)
+            fig.add_subplot(steering_curve)
 
-        # form data array
-        fig.canvas.draw()
-        data_buffer = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        data_buffer = data_buffer.reshape(
-            fig.canvas.get_width_height()[::-1] + (3,))
+            outer_grid.tight_layout(fig)
 
-        fig.close()
+            # form data array
+            fig.canvas.draw()
+            data_buffer = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
+            data_buffer = data_buffer.reshape(
+                fig.canvas.get_width_height()[::-1] + (3,))
 
-        return data_buffer
+            fig.clear()
+            plt.close(fig)
+            gc.collect()
 
-    clip = mpy.VideoClip(make_aps_dvs_frame, duration=duration)
+            return data_buffer
 
-    clip.write_videofile(os.path.join(spiker.HOME, "data", "exps",
-                         "dataset-%d-video.mp4" % (recording_idx)),
-                         fps=fps)
+        clip = mpy.VideoClip(make_aps_dvs_frame, duration=duration)
+
+        clip.write_videofile(os.path.join(spiker.HOME, "data", "exps",
+                             "dataset-%d-video.mp4" % (data_idx)),
+                             fps=fps)
 
 elif options == "get-intensity-plot":
     data_root_path = os.path.join(
