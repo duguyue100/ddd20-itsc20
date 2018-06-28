@@ -22,6 +22,8 @@ import moviepy.editor as mpy
 
 import spiker
 
+matplotlib.rcParams['text.usetex'] = True
+
 num_trails = 5
 conditions = ["full", "aps", "dvs"]
 channel_options = {
@@ -298,10 +300,10 @@ def get_results(exps_root_path, get_eva=True):
 
 
 #  options = "get-mean-std"
-#  options = "get-result-cut"
+options = "get-result-cut"
 #  options = "investigate-examples"
 #  options = "get-intensity-plot"
-options = "export-video"
+#  options = "export-video"
 
 if options == "get-mean-std":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
@@ -441,11 +443,9 @@ elif options == "get-result-cut":
     outer_grid.tight_layout(fig)
 
     print ("[MESSAGE] Writing")
-    plt.show()
-    #  plt.savefig(join(spiker.SPIKER_EXTRA, "cvprfigs",
-    #                   "vis"+model_base+"result"+".pdf"),
-    #              dpi=600, format="pdf",
-    #              bbox="tight", pad_inches=0.5)
+    plt.savefig(os.path.join(spiker.HOME, "data", "results.pdf"),
+                dpi=600, format="pdf",
+                bbox="tight", pad_inches=0.5)
 elif options == "investigate-examples":
     exps_root_path = os.path.join(spiker.HOME, "data", "exps", "ral-exps")
     #  night_results, night_rmse, night_y = get_subset_results(
